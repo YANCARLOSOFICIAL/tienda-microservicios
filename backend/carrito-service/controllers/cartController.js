@@ -1,103 +1,115 @@
+const axios = require('axios');
 const Cart = require('../models/Cart');
-const axios = require('axios'); // Usar axios para hacer solicitudes HTTP
 
-// Obtener el carrito de un usuario por userId
-exports.getCart = async (req, res) => {
-  const { userId } = req.params;
+// Crear un carrito para un usuario
+exports.createCart = async (req, res) => {
+  const { userId, items } = req.body;
+
+  if (!userId || !items) {
+    return res.status(400).json({ error: 'Faltan datos en la solicitud' });
+  }
 
   try {
-    // Encuentra el carrito por userId
-    const cart = await Cart.findOne({ userId });
-
-    if (!cart) {
-      return res.status(404).json({ error: 'Carrito no encontrado' });
+    // Verificar si el usuario existe en el servicio de usuarios
+    const userResponse = await axios.get(`http://localhost:3002/users/${userId}`);
+    if (!userResponse.data) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
     }
 
-    // Hacer una solicitud al servicio de productos para obtener detalles de cada producto
-    const productDetails = await Promise.all(
-      cart.items.map(async (item) => {
-        const response = await axios.get(`http://localhost:3001/api/products/${item.productId}`);
-        return {
-          product: response.data,
-          quantity: item.quantity
-        };
-      })
-    );
+    // Obtener el nombre del usuario
+    const userName = userResponse.data.name;
 
-    // Devuelve el carrito con los detalles de los productos
-    res.status(200).json({
-      _id: cart._id,
-      userId: cart.userId,
-      items: productDetails
-    });
+    const cart = new Cart({ userId, items });
+    await cart.save();
+
+    res.status(201).json({ cart, userName });
   } catch (error) {
-    console.error("Error al obtener el carrito:", error);
-    res.status(500).json({ error: 'Error al obtener el carrito' });
-  }
-};
-
-// Crear un nuevo carrito
-exports.createCart = async (req, res) => {
-  const { userId } = req.body;
-
-  try {
-    const newCart = new Cart({ userId, items: [] });
-    await newCart.save();
-
-    res.status(201).json(newCart);
-  } catch (error) {
-    console.error("Error al crear el carrito:", error);
+    console.error(error);
     res.status(500).json({ error: 'Error al crear el carrito' });
   }
 };
 
-// Agregar un producto al carrito
-exports.addProductToCart = async (req, res) => {
-  const { userId, productId, quantity } = req.body;
+// Obtener el carrito de un usuario por su ID
+exports.getCartByUserId = async (req, res) => {
+  const { userId } = req.params;
+
+  if (!userId) {
+    return res.status(400).json({ error: 'Falta el ID del usuario' });
+  }
 
   try {
-    const cart = await Cart.findOne({ userId });
-
+    const cart = await Cart.findOne({ userId }).populate('items.productId');
     if (!cart) {
       return res.status(404).json({ error: 'Carrito no encontrado' });
     }
+    res.status(200).json(cart);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al obtener el carrito' });
+  }
+};
 
+// Agregar un producto al carrito
+exports.addItemToCart = async (req, res) => {
+  const { userId, productId, quantity } = req.body;
+
+  if (!userId || !productId || !quantity) {
+    return res.status(400).json({ error: 'Faltan datos en la solicitud' });
+  }
+
+  try {
+    // Verificar si el producto existe en el servicio de productos
+    const productResponse = await axios.get(`http://localhost:3001/api/products/${productId}`);
+    if (!productResponse.data) {
+      return res.status(404).json({ error: 'Producto no encontrado' });
+    }
+
+    // Obtener el ID del producto
+    const productData = productResponse.data;
+
+    let cart = await Cart.findOne({ userId });
+
+    if (!cart) {
+      cart = new Cart({ userId, items: [] });
+    }
+
+    // Buscar si el producto ya existe en el carrito
     const existingItemIndex = cart.items.findIndex(item => item.productId.toString() === productId);
-
     if (existingItemIndex > -1) {
-      // Si el producto ya existe, actualizar la cantidad
-      cart.items[existingItemIndex].quantity += quantity;
+      cart.items[existingItemIndex].quantity += quantity; // Incrementar cantidad si el producto ya está en el carrito
     } else {
-      // Si no existe, agregar un nuevo producto
-      cart.items.push({ productId, quantity });
+      cart.items.push({ productId: productData._id, quantity }); // Usar el ID del producto devuelto por el microservicio
     }
 
     await cart.save();
     res.status(200).json(cart);
   } catch (error) {
-    console.error("Error al agregar producto al carrito:", error);
-    res.status(500).json({ error: 'Error al agregar producto al carrito' });
+    console.error(error);
+    res.status(500).json({ error: 'Error al agregar el producto al carrito' });
   }
 };
 
-// Eliminar un producto del carrito
-exports.removeProductFromCart = async (req, res) => {
-  const { userId, productId } = req.body;
+// Remover un producto del carrito
+exports.removeItemFromCart = async (req, res) => {
+  const { userId, productId } = req.params;
+
+  if (!userId || !productId) {
+    return res.status(400).json({ error: 'Faltan datos en la solicitud' });
+  }
 
   try {
     const cart = await Cart.findOne({ userId });
-
     if (!cart) {
       return res.status(404).json({ error: 'Carrito no encontrado' });
     }
 
-    // Filtrar el producto que se quiere eliminar
+    // Filtrar el producto que se desea eliminar
     cart.items = cart.items.filter(item => item.productId.toString() !== productId);
     await cart.save();
 
     res.status(200).json(cart);
   } catch (error) {
-    console.error("Error al eliminar producto del carrito:", error);
-    res.status(500).json({ error: 'Error al eliminar producto del carrito' });
+    console.error(error);
+    res.status(500).json({ error: 'Error al eliminar el producto del carrito' });
   }
 };

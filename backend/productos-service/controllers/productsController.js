@@ -23,3 +23,20 @@ exports.createProduct = async (req, res) => {
     res.status(500).json({ error: 'Error al crear producto' });
   }
 };
+
+// Obtener un producto por ID
+// Obtener un producto por ID
+exports.getProductById = async (req, res) => {
+  const { id } = req.params; // Aquí cambia de productId a id
+
+  try {
+    const product = await Product.findById(id); // Buscar por ID
+    if (!product) {
+      return res.status(404).json({ error: 'Producto no encontrado' });
+    }
+    res.status(200).json(product);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener el producto' });
+  }
+};
+
