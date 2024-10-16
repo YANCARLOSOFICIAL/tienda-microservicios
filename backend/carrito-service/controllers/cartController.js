@@ -113,3 +113,13 @@ exports.removeItemFromCart = async (req, res) => {
     res.status(500).json({ error: 'Error al eliminar el producto del carrito' });
   }
 };
+
+// Obtener todos los carritos
+exports.getAllCarts = async (req, res) => {
+  try {
+    const carts = await Cart.find(); // Obtiene todos los documentos de la colección
+    res.status(200).json(carts);
+  } catch (error) {
+    res.status(500).json({ message: 'Error al obtener los carritos', error });
+  }
+};

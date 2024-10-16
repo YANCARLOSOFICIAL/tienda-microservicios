@@ -4,9 +4,12 @@ const {
   createCart,
   getCartByUserId,
   addItemToCart,
-  removeItemFromCart
+  removeItemFromCart,
+  getAllCarts, 
 } = require('../controllers/cartController');
 
+//todos
+router.get('/all',getAllCarts);
 // Crear un carrito
 router.post('/', createCart);
 
@@ -18,5 +21,8 @@ router.post('/add', addItemToCart);
 
 // Remover un producto del carrito
 router.delete('/remove/:userId/:productId', removeItemFromCart);
+
+//todos
+router.get('/all',getAllCarts);
 
 module.exports = router;

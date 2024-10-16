@@ -1,45 +1,25 @@
-import React, { createContext, useState, useEffect } from 'react';
-import axiosInstance from '../config/axiosConfig';
+import React, { createContext, useState } from 'react';
 
 export const AuthContext = createContext();
 
 const AuthProvider = ({ children }) => {
   const [auth, setAuth] = useState({
-    token: localStorage.getItem('token'),
     isAuthenticated: false,
     user: null,
   });
 
-  useEffect(() => {
-    if (auth.token) {
-      axiosInstance.get('/users/profile', {
-        headers: { Authorization: `Bearer ${auth.token}` }
-      })
-        .then(response => {
-          setAuth({
-            ...auth,
-            isAuthenticated: true,
-            user: response.data,
-          });
-        })
-        .catch(() => {
-          setAuth({
-            ...auth,
-            isAuthenticated: false,
-            user: null,
-          });
-        });
-    }
-  }, [auth.token]);
-
-  const login = (token) => {
-    localStorage.setItem('token', token);
-    setAuth({ ...auth, token, isAuthenticated: true });
+  const login = (user) => {
+    setAuth({
+      isAuthenticated: true,
+      user,
+    });
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
-    setAuth({ token: null, isAuthenticated: false, user: null });
+    setAuth({
+      isAuthenticated: false,
+      user: null,
+    });
   };
 
   return (

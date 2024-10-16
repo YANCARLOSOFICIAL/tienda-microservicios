@@ -1,28 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import axiosInstance from '../config/axiosConfig';
+import React, { useEffect, useState } from 'react';
+import { fetchProducts } from '../services/productService';
 
 const Products = () => {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    axiosInstance.get('/products')
-      .then(response => {
-        setProducts(response.data);
-      })
-      .catch(error => {
-        console.error('Error fetching products:', error);
-      });
+    const loadProducts = async () => {
+      try {
+        const data = await fetchProducts();
+        setProducts(data);
+      } catch (error) {
+        console.error('Error loading products', error);
+      }
+    };
+
+    loadProducts();
   }, []);
 
   return (
-    <div>
-      <h1>Products</h1>
-      <div className="product-list">
+    <div className="container mx-auto py-8">
+      <h1 className="text-3xl font-bold text-center mb-6">Products</h1>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {products.map(product => (
-          <div key={product._id} className="product-item">
-            <h3>{product.name}</h3>
+          <div key={product.id} className="border p-4 rounded-lg">
+            <h2 className="text-lg font-semibold">{product.name}</h2>
             <p>{product.description}</p>
-            <p>Price: ${product.price}</p>
+            <p className="font-bold">${product.price}</p>
           </div>
         ))}
       </div>

@@ -1,32 +1,44 @@
-import React, { useState, useEffect } from 'react';
-import axiosInstance from '../config/axiosConfig';
+import React, { useEffect, useState } from 'react';
+import { fetchAllCarts } from '../services/cartService';
 
-const Cart = () => {
-  const [cart, setCart] = useState([]);
+const CartPage = () => {
+  const [carts, setCarts] = useState([]);
+  const [error, setError] = useState(null);
+
+  const loadAllCarts = async () => {
+    try {
+      const allCarts = await fetchAllCarts();
+      setCarts(allCarts);
+    } catch (error) {
+      setError('Error al cargar los carritos');
+    }
+  };
 
   useEffect(() => {
-    axiosInstance.get('/cart')
-      .then(response => {
-        setCart(response.data.items);
-      })
-      .catch(error => {
-        console.error('Error fetching cart:', error);
-      });
+    loadAllCarts();
   }, []);
 
   return (
     <div>
-      <h1>Your Cart</h1>
-      <div className="cart-items">
-        {cart.map(item => (
-          <div key={item.productId} className="cart-item">
-            <h3>{item.productName}</h3>
-            <p>Quantity: {item.quantity}</p>
+      <h2>Todos los Carritos</h2>
+      {error && <p>{error}</p>}
+      {carts.length > 0 ? (
+        carts.map((cart) => (
+          <div key={cart._id}>
+            <h3>Carrito de {cart.userId}</h3>
+            {cart.items.map((item) => (
+              <div key={item.productId._id}>
+                <p>Producto: {item.productId.name}</p>
+                <p>Cantidad: {item.quantity}</p>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        ))
+      ) : (
+        <p>No se encontraron carritos.</p>
+      )}
     </div>
   );
 };
 
-export default Cart;
+export default CartPage;

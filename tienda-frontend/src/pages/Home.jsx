@@ -2,9 +2,12 @@ import React from 'react';
 
 const Home = () => {
   return (
-    <div className="container mx-auto mt-8">
-      <h1 className="text-4xl font-bold mb-4">Welcome to the Store</h1>
-      <p className="text-lg">Explore our products and place your orders.</p>
+    <div className="container my-5">
+      <div className="text-center">
+        <h1 className="display-4">bienvenido a  close shop</h1>
+        <p className="lead">Explora todos nuestros productos y realiza tu pedido.</p>
+        <a href="/products" className="btn btn-primary btn-lg">ver productos</a>
+      </div>
     </div>
   );
 };
