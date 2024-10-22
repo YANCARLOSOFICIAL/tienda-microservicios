@@ -4,7 +4,7 @@ import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Products from './pages/Products';
 import Cart from './pages/CartPage';
-import Orders from './pages/Order';
+
 import Login from './pages/Login';
 import Register from './pages/Register';
 import UserProfile from './pages/UserProfilePage';
@@ -33,7 +33,7 @@ function App() {
 
                 {/* Rutas protegidas */}
                 <Route element={<PrivateRoute />}>
-                  <Route path="/orders" element={<Orders />} />
+                  
                   <Route path="/user/profile" element={<UserProfile />} />
                 </Route>
               </Routes>

@@ -1,13 +1,12 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3001/api/products'; // URL de tu microservicio de productos
+const API_URL = 'http://localhost:3001/api/products';
 
-export const fetchProducts = async () => {
-  try {
-    const response = await axios.get(API_URL);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching products', error);
-    throw error;
-  }
-};
+const getProducts = () => axios.get(API_URL);
+const addProduct = (product) => axios.post(API_URL, product, { headers: { 'Content-Type': 'multipart/form-data' } });
+const updateProduct = (id, product) => axios.put(`${API_URL}/${id}`, product, { headers: { 'Content-Type': 'multipart/form-data' } });
+const deleteProduct = (id) => axios.delete(`${API_URL}/${id}`);
+
+const productService = { getProducts, addProduct, updateProduct, deleteProduct };
+
+export default productService;

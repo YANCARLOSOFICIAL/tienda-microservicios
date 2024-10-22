@@ -1,31 +1,129 @@
 import React, { useEffect, useState } from 'react';
-import { fetchProducts } from '../services/productService';
+import productService from '../services/productService';
+import ProductCard from '../components/ProductCard';
 
 const Products = () => {
   const [products, setProducts] = useState([]);
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [formData, setFormData] = useState({ name: '', price: '', description: '', stock: '' });
+  const [image, setImage] = useState(null);
 
   useEffect(() => {
-    const loadProducts = async () => {
-      try {
-        const data = await fetchProducts();
-        setProducts(data);
-      } catch (error) {
-        console.error('Error loading products', error);
-      }
-    };
-
     loadProducts();
   }, []);
 
+  const loadProducts = () => {
+    productService.getProducts()
+      .then(response => setProducts(response.data))
+      .catch(error => console.error('Error al cargar productos:', error));
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleImageChange = (e) => {
+    setImage(e.target.files[0]);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const data = new FormData();
+    Object.keys(formData).forEach((key) => data.append(key, formData[key]));
+    if (image) data.append('image', image);
+
+    const request = editingProduct
+      ? productService.updateProduct(editingProduct._id, data)
+      : productService.addProduct(data);
+
+    request
+      .then(() => {
+        loadProducts();
+        setEditingProduct(null);
+        setFormData({ name: '', price: '', description: '', stock: '' });
+        setImage(null);
+      })
+      .catch(error => console.error('Error al guardar producto:', error));
+  };
+
+  const handleEdit = (product) => {
+    setEditingProduct(product);
+    setFormData(product);
+  };
+
+  const handleDelete = (id) => {
+    productService.deleteProduct(id)
+      .then(() => loadProducts())
+      .catch(error => console.error('Error al eliminar producto:', error));
+  };
+
   return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold text-center mb-6">Products</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        {products.map(product => (
-          <div key={product.id} className="border p-4 rounded-lg">
-            <h2 className="text-lg font-semibold">{product.name}</h2>
-            <p>{product.description}</p>
-            <p className="font-bold">${product.price}</p>
+    <div className="container mt-5">
+      <h1 className="text-center mb-4">Productos</h1>
+
+      <form onSubmit={handleSubmit} className="row g-3 mb-4">
+        <div className="col-md-3">
+          <input
+            type="text"
+            name="name"
+            className="form-control"
+            placeholder="Nombre"
+            value={formData.name}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div className="col-md-2">
+          <input
+            type="number"
+            name="price"
+            className="form-control"
+            placeholder="Precio"
+            value={formData.price}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div className="col-md-2">
+          <input
+            type="number"
+            name="stock"
+            className="form-control"
+            placeholder="Stock"
+            value={formData.stock}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div className="col-md-3">
+          <textarea
+            name="description"
+            className="form-control"
+            placeholder="Descripción"
+            value={formData.description}
+            onChange={handleChange}
+            required
+          ></textarea>
+        </div>
+        <div className="col-md-2">
+          <input type="file" className="form-control-file" onChange={handleImageChange} />
+        </div>
+        <div className="col-12 text-center">
+          <button type="submit" className="btn btn-primary">
+            {editingProduct ? 'Editar' : 'Agregar'}
+          </button>
+        </div>
+      </form>
+
+      <div className="row">
+        {products.map((product) => (
+          <div key={product._id} className="col-md-4 mb-4">
+            <ProductCard
+              product={product}
+              onEdit={() => handleEdit(product)}
+              onDelete={() => handleDelete(product._id)}
+            />
           </div>
         ))}
       </div>

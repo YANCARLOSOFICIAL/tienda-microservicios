@@ -2,47 +2,57 @@ import axios from 'axios';
 
 const API_URL = 'http://localhost:3003/api/cart';
 
-// Obtener el carrito de un usuario
-export const fetchCartByUserId = async (userId) => {
+// Agregar o actualizar un producto en el carrito
+export const addOrUpdateCart = async (productId, quantity) => {
   try {
-    const response = await axios.get(`${API_URL}/${userId}`);
+    const response = await axios.post(API_URL, { productId, quantity });
     return response.data;
   } catch (error) {
-    console.error('Error fetching cart for user', error);
+    console.error('Error al agregar o actualizar el carrito:', error);
     throw error;
   }
 };
 
-// Obtener todos los carritos
-export const fetchAllCarts = async () => {
+// Obtener el carrito completo
+export const getCart = async () => {
   try {
-    const response = await axios.get('http://localhost:3003/api/cart/all');
+    const response = await axios.get(API_URL);
     return response.data;
   } catch (error) {
-    console.error('Error fetching all carts', error);
-    throw error;
-  }
-};
-
-// Agregar un producto al carrito
-export const addToCart = async (userId, productId, quantity) => {
-  try {
-    const response = await axios.post(API_URL, { userId, productId, quantity });
-    return response.data;
-  } catch (error) {
-    console.error('Error adding product to cart', error);
+    console.error('Error al obtener el carrito:', error);
     throw error;
   }
 };
 
 // Eliminar un producto del carrito
-export const removeFromCart = async (userId, productId) => {
+export const removeItemFromCart = async (productId) => {
   try {
-    const response = await axios.delete(`${API_URL}/${userId}/${productId}`);
+    const response = await axios.delete(`${API_URL}/remove/${productId}`);
     return response.data;
   } catch (error) {
-    console.error('Error removing product from cart', error);
+    console.error('Error al eliminar el producto del carrito:', error);
     throw error;
   }
 };
 
+// Vaciar el carrito
+export const clearCart = async () => {
+  try {
+    const response = await axios.delete(`${API_URL}/clear`);
+    return response.data;
+  } catch (error) {
+    console.error('Error al vaciar el carrito:', error);
+    throw error;
+  }
+};
+
+// Obtener todos los carritos
+export const getAllCarts = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/all`);
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener los carritos:', error);
+    throw error;
+  }
+};

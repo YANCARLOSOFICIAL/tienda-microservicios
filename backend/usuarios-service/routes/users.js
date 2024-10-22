@@ -1,26 +1,22 @@
 const express = require('express');
 const router = express.Router();
-const {
-  registerUser,
-  loginUser,
-  getUserById,
-  updateUser,
-  deleteUser,
-} = require('../controllers/usersController');
+const userController = require('../controllers/usersController');
+const { authMiddleware } = require('../middlewares/authMiddleware');
+const { requireRole } = require('../middlewares/roleMiddleware');
 
-// Registro de usuario
-router.post('/register', registerUser);
+// Ruta para registrar usuario
+router.post('/register', userController.registerUser);
 
-// Inicio de sesión de usuario
-router.post('/login', loginUser);
+// Ruta para login de usuario
+router.post('/login', userController.loginUser);
 
-// Obtener usuario por ID
-router.get('/:userId', getUserById);
+// Ruta para obtener detalles del usuario autenticado
+router.get('/me', authMiddleware, userController.getUserDetails);
 
-// Actualizar usuario
-router.put('/:userId', updateUser);
+// Rutas protegidas para usuarios y administradores
+router.get('/dashboard', authMiddleware, requireRole(['user', 'admin']), userController.getDashboard);
 
-// Eliminar usuario
-router.delete('/:userId', deleteUser);
+// Ruta exclusiva para administradores
+router.get('/admin', authMiddleware, requireRole(['admin']), userController.getAdminPanel);
 
 module.exports = router;

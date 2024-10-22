@@ -1,11 +1,30 @@
 const express = require('express');
 const router = express.Router();
-const { getAllProducts, createProduct ,getProductById } = require('../controllers/productsController');
+const multer = require('multer');
+const {
+  getAllProducts,
+  createProduct,
+  getProductById,
+  updateProduct,
+  deleteProduct,
+} = require('../controllers/productsController');
 
-// Rutas para obtener todos los productos y crear uno nuevo
+// Configuración de almacenamiento de imágenes con Multer
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/');
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + '-' + file.originalname);
+  },
+});
+const upload = multer({ storage });
+
+// Rutas del CRUD de productos
 router.get('/', getAllProducts);
-router.post('/', createProduct);
+router.post('/', upload.single('image'), createProduct);
 router.get('/:id', getProductById);
-
+router.put('/:id', upload.single('image'), updateProduct);
+router.delete('/:id', deleteProduct);
 
 module.exports = router;

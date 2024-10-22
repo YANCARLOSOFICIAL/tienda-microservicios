@@ -5,6 +5,11 @@ const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
+  roles: { 
+    type: [String], 
+    enum: ['user', 'admin'],  // Enum para los roles posibles
+    default: ['user']         // El rol por defecto es 'user'
+  },
 });
 
 userSchema.pre('save', async function (next) {
@@ -16,6 +21,11 @@ userSchema.pre('save', async function (next) {
 
 userSchema.methods.comparePassword = function (password) {
   return bcrypt.compareSync(password, this.password);
+};
+
+// Método para verificar si el usuario tiene un rol específico
+userSchema.methods.hasRole = function (role) {
+  return this.roles.includes(role);
 };
 
 module.exports = mongoose.model('User', userSchema);
