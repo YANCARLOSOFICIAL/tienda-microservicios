@@ -1,23 +1,15 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
 
-// Middleware para verificar si el usuario está autenticado
-exports.authMiddleware = async (req, res, next) => {
-  const token = req.headers['authorization'];
-  
+exports.authMiddleware = (req, res, next) => {
+  const token = req.header('Authorization')?.replace('Bearer ', '');
+
   if (!token) {
-    return res.status(401).json({ error: 'Acceso no autorizado, se requiere token' });
+    return res.status(401).json({ error: 'No se proporcionó un token' });
   }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id);
-    
-    if (!user) {
-      return res.status(401).json({ error: 'Usuario no encontrado' });
-    }
-
-    req.user = user; // Guardamos el usuario en la solicitud
+    req.user = decoded;
     next();
   } catch (error) {
     res.status(401).json({ error: 'Token inválido o expirado' });

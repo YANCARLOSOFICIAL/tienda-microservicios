@@ -1,5 +1,4 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import * as jwtDecode from 'jwt-decode'; // Importación del módulo completo
 
 export const AuthContext = createContext();
 
@@ -8,29 +7,27 @@ export const useAuth = () => useContext(AuthContext);
 const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
-  // Cargar el token desde localStorage y decodificarlo al iniciar
+  // Cargar el token al iniciar la aplicación
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      try {
-        const decodedUser = jwtDecode(token); // Usar la función directamente
-        console.log('Usuario decodificado:', decodedUser);
-        setUser(decodedUser);
-      } catch (error) {
-        console.error('Error al decodificar el token:', error);
+    const loadUser = () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        const decodedUser = decodeToken(token);
+        if (decodedUser) {
+          console.log('Usuario decodificado:', decodedUser);
+          setUser(decodedUser);
+        }
       }
-    }
+    };
+    loadUser();
   }, []);
 
   const login = (token) => {
     console.log('Login exitoso con token:', token);
-    try {
-      localStorage.setItem('token', token);
-      const decodedUser = jwtDecode(token); // Usar la función directamente
-      console.log('Usuario decodificado durante login:', decodedUser);
+    localStorage.setItem('token', token);
+    const decodedUser = decodeToken(token);
+    if (decodedUser) {
       setUser(decodedUser);
-    } catch (error) {
-      console.error('Error al decodificar el token durante login:', error);
     }
   };
 
@@ -48,3 +45,21 @@ const AuthProvider = ({ children }) => {
 };
 
 export default AuthProvider;
+
+// Función para decodificar el JWT
+const decodeToken = (token) => {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => `%${('00' + c.charCodeAt(0).toString(16)).slice(-2)}`)
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch (error) {
+    console.error('Error al decodificar el token:', error);
+    return null;
+  }
+};

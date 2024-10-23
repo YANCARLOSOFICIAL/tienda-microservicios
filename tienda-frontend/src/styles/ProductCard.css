@@ -1,22 +1,13 @@
-.card {
-    margin: 15px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-  
-  .card img {
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
-    height: 300px;
-    object-fit: cover;
-  }
-  
-  button {
-    margin-top: 10px;
-  }
-  
-  .modal-body p {
-    font-size: 1.1rem;
-    margin: 0;
-  }
-  
+.product-card {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.product-card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.product-image {
+  max-height: 200px;
+  object-fit: cover;
+}

@@ -1,0 +1,20 @@
+body {
+    background-color: #f0f4f8;
+  }
+  
+  .custom-card {
+    border-radius: 10px;
+    background-color: #ffffff;
+    padding: 40px;
+  }
+  
+  button {
+    background-color: #3A6351;
+    border: none;
+  }
+  
+  button:hover {
+    background-color: #2e523e;
+    transition: background-color 0.3s ease;
+  }
+  

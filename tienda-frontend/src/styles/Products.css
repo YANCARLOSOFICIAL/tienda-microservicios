@@ -1,0 +1,35 @@
+.container {
+    max-width: 1200px;
+  }
+  
+  h1 {
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+  
+  .form-inline input,
+  .form-inline textarea {
+    width: auto;
+    margin-bottom: 10px;
+  }
+  
+  .form-inline textarea {
+    resize: none;
+    width: 200px;
+  }
+  
+  .form-inline button {
+    margin-top: 10px;
+  }
+  
+  .product-card {
+    border: none;
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    border-radius: 15px;
+  }
+  
+  .product-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  }
+  

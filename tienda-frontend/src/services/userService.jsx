@@ -1,23 +1,21 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3002/api/users'; // Microservicio de usuarios
-
-export const loginUser = async (email, password) => {
-  try {
-    const response = await axios.post(`${API_URL}/login`, { email, password });
-    return response.data;
-  } catch (error) {
-    console.error('Error logging in', error);
-    throw error;
-  }
-};
+const API_URL = 'http://localhost:3002/api/users'; // Cambia la URL si es necesario
 
 export const registerUser = async (userData) => {
-  try {
-    const response = await axios.post(`${API_URL}/register`, userData);
-    return response.data;
-  } catch (error) {
-    console.error('Error registering user', error);
-    throw error;
-  }
+  return await axios.post(`${API_URL}/register`, userData);
+};
+
+export const loginUser = async (credentials) => {
+  const response = await axios.post(`${API_URL}/login`, credentials);
+  const { token } = response.data;
+  localStorage.setItem('token', token); // Guardar el token en localStorage
+  return token;
+};
+
+export const getUserDetails = async () => {
+  const token = localStorage.getItem('token');
+  return axios.get(`${API_URL}/me`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
 };
